@@ -6,8 +6,8 @@ import "fmt"
 // Define the interface
 // ----------------------
 
-// paymenter is an interface that defines a single behavior: pay
-// Any type that has a method `pay(amount float32)` automatically implements this interface
+// paymenter is an interface that defines a single behavior: pay and refund
+// Any type that has these methods automatically implements this interface
 type paymenter interface {
 	pay(amount float32)
 	refund(amount float32)
@@ -24,11 +24,29 @@ type payment struct {
 	gateway paymenter // this is the "skill" or "worker" that knows how to pay
 }
 
+// ----------------------
+// Dependency Inversion happens here!
+// ----------------------
+// The payment struct (high-level module) depends on the abstraction `paymenter` (interface)
+// rather than a concrete implementation like Razorpay or Stripe.
+// This allows us to inject any gateway that implements paymenter.
+// High-level module: payment
+// Abstraction: paymenter
+// Low-level modules: razorpay, stripe
+
 // makePayment is a method on payment struct
 // This method delegates the actual payment to the gateway
 func (p payment) makePayment(amount float32) {
+	fmt.Println("Payment service: initiating payment of", amount)
 	// call the pay method of the injected gateway
 	p.gateway.pay(amount)
+}
+
+// makeRefund is another method to handle refunds
+func (p payment) makeRefund(amount float32) {
+	fmt.Println("Payment service: initiating refund of", amount)
+	// call the refund method of the injected gateway
+	p.gateway.refund(amount)
 }
 
 // ----------------------
@@ -41,48 +59,86 @@ type razorpay struct {
 }
 
 // Implement the pay method for Razorpay
-// Since razorpay has pay method, it implements paymenter interface
 func (r razorpay) pay(amount float32) {
-	// logic to make payment (simplified)
-	fmt.Println("Making payment using Razorpay:", amount)
+	fmt.Println("Razorpay gateway: processing payment of", amount)
 }
+
+// Implement the refund method for Razorpay
 func (r razorpay) refund(amount float32) {
-	// logic to make payment (simplified)
-	fmt.Println("Making refund using Razorpay:", amount)
+	fmt.Println("Razorpay gateway: processing refund of", amount)
 }
+
 // ----------------------
-// (Optional) Another payment gateway
+// Another concrete payment gateway (Stripe)
 // ----------------------
-// You can add another gateway like Stripe easily:
 
 type stripe struct {
 	// Stripe-specific fields
 }
 
 func (s stripe) pay(amount float32) {
-	//l
-	fmt.Println("Making payment using Stripe:", amount)
+	fmt.Println("Stripe gateway: processing payment of", amount)
 }
+
 func (s stripe) refund(amount float32) {
-	//l
-	fmt.Println("Making refund using Stripe:", amount)
+	fmt.Println("Stripe gateway: processing refund of", amount)
 }
 
 // ----------------------
 // Main function
 // ----------------------
 func main() {
+	// ----------------------
+	// Example 1: Use Razorpay
+	// ----------------------
+
 	// Create a new payment using Razorpay as the gateway
 	newPayment := payment{
-		gateway: razorpay{}, // inject Razorpay as the "worker"
+		gateway: razorpay{}, // injecting the dependency (Razorpay implements paymenter)
 	}
 
 	// Make a payment of 100
-	// The payment struct delegates the actual payment to the gateway
+	// Payment struct delegates the actual payment to the gateway
 	newPayment.makePayment(100)
 
-	// If you want to switch to Stripe, just inject it here (no change to payment struct)
-	newPayment.gateway = stripe{}
+	// Make a refund of 20
+	newPayment.makeRefund(20)
+
+	// ----------------------
+	// Example 2: Switch to Stripe
+	// ----------------------
+
+	// Without changing the payment struct or makePayment logic, we can swap the gateway
+	newPayment.gateway = stripe{} // inject Stripe instead of Razorpay
+
+	// Make a payment using Stripe
 	newPayment.makePayment(200)
-	newPayment.gateway.refund(30)
+
+	// Make a refund using Stripe
+	newPayment.makeRefund(50)
+
+	// ----------------------
+	// ✅ Key concepts in this code
+	// ----------------------
+
+	// 1. Dependency Inversion Principle (DIP):
+	//    - High-level module (payment) depends on abstraction (paymenter), not concrete implementations (Razorpay/Stripe).
+	//    - Low-level modules (razorpay, stripe) implement the abstraction.
+	//    - This allows us to switch gateways easily without changing payment struct code.
+
+	// 2. Interfaces provide flexibility:
+	//    - Any struct implementing paymenter can be injected.
+	//    - Payment struct does not care about the concrete type.
+
+	// 3. Composition over inheritance:
+	//    - Payment struct "has a" gateway (composition), rather than "is a" gateway.
+	//    - This avoids tight coupling and allows swapping behavior at runtime.
+
+	// 4. Delegation:
+	//    - Payment struct delegates payment and refund tasks to the injected gateway.
+	//    - Makes it easy to add extra logic (logging, retry, validation) in payment struct.
+
+	// 5. Extendable design:
+	//    - To add a new gateway (e.g., PayPal), just implement paymenter.
+	//    - No changes needed in payment struct.
 }

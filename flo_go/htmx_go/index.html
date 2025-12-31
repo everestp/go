@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <title>Go + HTMX</title>
+</head>
+<body>
+    <h1>Go + HTMX Demo</h1>
+
+    <h2>{{.Message}}</h2>
+
+    <button hx-get="/time" hx-target="#time">
+        Get current time
+    </button>
+
+    <h2 id="time">Show current time</h2>
+</body>
+</html>
