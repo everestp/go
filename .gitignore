@@ -31,4 +31,16 @@ go.work.sum
 # .idea/
 # .vscode/
 
-cert.pem
+# Certificates and Keys
+*.pem
+*.crt
+*.key
+
+# Go binary and workspace files
+server
+*.exe
+go.work
+http-server/key.pem
+http-server/key.pem
+http-server/cert.pem
+http-server/openssl.cnf
