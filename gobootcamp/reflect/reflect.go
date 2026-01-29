@@ -96,3 +96,4 @@ func main() {
 		fmt.Println("Interface contains string:", vItf.String())
 	}
 }
+//
