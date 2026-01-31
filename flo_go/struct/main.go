@@ -14,6 +14,3 @@ func getPortedFlag() string {
 }
 
 
-func is_even(number int){
-	if   nbu
-}
