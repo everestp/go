@@ -32,7 +32,7 @@ import (
 
 func main() {
 	numGoroutines := 3
-	done := make(chan int, 3)
+	done := make555555(chan int, 3)
 	for i := range numGoroutines {
 		go func(id int) {
 			fmt.Printf("Goroutine %d working ...\n", id)
