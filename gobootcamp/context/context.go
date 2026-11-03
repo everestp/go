@@ -20,7 +20,7 @@ func doWork(ctx context.Context) {
 	}
 }
 
-func main() {
+func contexts() {
 	rootCtx := context.Background()
 	// ctx, cancel := context.WithTimeout(rootCtx, 2*time.Second) // time of the context start here  After this time duration the context will send a cancelation signals
 
