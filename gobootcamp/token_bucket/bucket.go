@@ -74,7 +74,7 @@ func main() {
 			fmt.Printf("Request %2d: Denied (Rate limit exceeded)\n", i)
 		}
 		// Small delay between requests to watch behavior
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 	}
 
 	// Wait long enough for the background goroutine to refill some tokens
